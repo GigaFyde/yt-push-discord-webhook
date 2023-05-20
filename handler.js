@@ -14,7 +14,23 @@ module.exports = async (event, context) => {
         }
     }
     if (event.method === "POST") {
-        // To add logic later
+        if (!event.query["webhook_url"]) {
+            return context.status(400)
+        }
+        const parser = new XMLParser();
+        const json = parser.parse(event.body);
+        let url = `https://www.youtube.com/watch?v=${json.feed.entry["yt:videoId"]}`
+        await fetch(event.query["webhook_url"], {
+            "method": "POST",
+            "headers": {"Content-Type": "application/json"},
+            "body": JSON.stringify({
+                "content": url,
+                "embeds": null,
+                "username": "Youtube Push Notification",
+                "avatar_url": "https://b2.gigafyde.net/file/gify-file/2023/05/20/youtube-512-289233.png",
+                "attachments": []
+            })
+        })
         return context
             .status(200)
             .headers({"Content-type": "application/json"})
